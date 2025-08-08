@@ -39,6 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+EXTERNAL_APPS = [
+    'watchlist_app',  # Custom app for managing watchfiles
+    ]
+
+INSTALLED_APPS += EXTERNAL_APPS
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -75,14 +81,13 @@ WSGI_APPLICATION = 'imdb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'ccOKTNveYpqNBbxaqXXRiRDIEOzUwfKd',
-        'HOST': 'postgres.railway.internal',
-        'PORT': '5432',
+        'NAME': 'railway',                       
+        'USER': 'postgres',                        
+        'PASSWORD': 'ccOKTNveYpqNBbxaqXXRiRDIEOzUwfKd', 
+        'HOST': 'trolley.proxy.rlwy.net',          
+        'PORT': '28950',                           
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
