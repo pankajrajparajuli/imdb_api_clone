@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path , include
-from watchlist_app import urls as watchlist_urls
+from watchlist_app.api import urls as watchlist_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
