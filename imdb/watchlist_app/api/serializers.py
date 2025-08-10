@@ -1,28 +1,29 @@
 from rest_framework import serializers
-from watchlist_app.models import WatchList, StreamingPlatform
+from watchlist_app.models import WatchList, StreamingPlatform, Review
 
-class StreamingPlatformSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     """
-    Serializer for the StreamingPlatform model.
+    Serializer for the Review model.
     """
     class Meta:
-        model = StreamingPlatform
+        model = Review
         fields = '__all__'
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'created_at')
     
-    def validate_name(self, value):
-        if len(value) < 2:
-            raise serializers.ValidationError("Name must be at least 2 characters long.")
-        if len(value) > 100:
-            raise serializers.ValidationError("Name must be at most 100 characters long.")
+    def validate(self, attrs):
+        if not attrs.get('review_text'):
+            raise serializers.ValidationError("Review text is required.")
+        if attrs.get('rating') is None:
+            raise serializers.ValidationError("Rating is required.")
+        return attrs
+    
+    def validate_rating(self, value):
+        if value < 1 or value > 10:
+            raise serializers.ValidationError("Rating must be between 1 and 10.")
         return value
     
-    def validate_website(self, value):
-        if value and not value.startswith('http'):
-            raise serializers.ValidationError("Website must start with 'http' or 'https'.")
-        return value
-
 class WatchListSerializer(serializers.ModelSerializer):
+    review = ReviewSerializer(many=True, read_only=True)
     len_title = serializers.SerializerMethodField()
     
     """
@@ -80,6 +81,29 @@ class WatchListSerializer(serializers.ModelSerializer):
     def validate_active(self, value):
         if not isinstance(value, bool):
             raise serializers.ValidationError("Active must be a boolean value.")
+        return value
+
+class StreamingPlatformSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the StreamingPlatform model.
+    """
+    watchlist = WatchListSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = StreamingPlatform
+        fields = '__all__'
+        read_only_fields = ('id',)
+    
+    def validate_name(self, value):
+        if len(value) < 2:
+            raise serializers.ValidationError("Name must be at least 2 characters long.")
+        if len(value) > 100:
+            raise serializers.ValidationError("Name must be at most 100 characters long.")
+        return value
+    
+    def validate_website(self, value):
+        if value and not value.startswith('http'):
+            raise serializers.ValidationError("Website must start with 'http' or 'https'.")
         return value
 
 """ class MovieSerializer(serializers.Serializer):
