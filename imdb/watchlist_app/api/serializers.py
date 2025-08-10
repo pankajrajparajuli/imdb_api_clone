@@ -23,9 +23,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         return value
     
 class WatchListSerializer(serializers.ModelSerializer):
-    review = ReviewSerializer(many=True, read_only=True)
+    reviews= ReviewSerializer(many=True, read_only=True)
     len_title = serializers.SerializerMethodField()
-    
     """
     Serializer for the Movie model.
     """
@@ -38,7 +37,7 @@ class WatchListSerializer(serializers.ModelSerializer):
         """
         Returns the length of the movie title.
         """
-        return len(obj.title) if obj.title else 0
+        return len(obj.title)
     
     def validate(self, attrs):
         if not attrs.get('title'):

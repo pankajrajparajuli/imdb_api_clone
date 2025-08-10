@@ -1,9 +1,9 @@
-from watchlist_app.models import WatchList, StreamingPlatform
+from watchlist_app.models import WatchList, StreamingPlatform, Review
 #from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from watchlist_app.api.serializers import WatchListSerializer, StreamingPlatformSerializer
-from rest_framework import status
+from watchlist_app.api.serializers import WatchListSerializer, StreamingPlatformSerializer, ReviewSerializer
+from rest_framework import status, generics, mixins
 
 class WatchListView(APIView):
     """ 
@@ -55,6 +55,34 @@ class WatchListDetailView(APIView):
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class ReviewListView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    """ List all reviews or create a new review.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+    
+
+class ReviewDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+    """ Retrieve, update or delete a review instance.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+    
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
 class StreamingPlatformView(APIView):
     """
     List all streaming platforms or create a new one.
@@ -104,6 +132,9 @@ class StreamingPlatformDetailView(APIView):
             return Response({'error': 'Streaming Platform not found'}, status=status.HTTP_404_NOT_FOUND)
         platform.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
 
 """ @api_view(['GET','POST'])
 def movie_list(request):
