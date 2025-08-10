@@ -23,6 +23,22 @@ class MovieSerializer(serializers.Serializer):
         instance.save()
         return instance
     
+    def validate(self, attrs):
+        if not attrs.get('title'):
+            raise serializers.ValidationError("Title is required.")
+        if not attrs.get('description'):
+            raise serializers.ValidationError("Description is required.")
+        if attrs.get('rating') is None:
+            raise serializers.ValidationError("Rating is required.")
+        if attrs.get('release_date') is None:
+            raise serializers.ValidationError("Release date is required.")
+        return attrs
+    
+    def validate(self,attrs):
+        if attrs['title'] == attrs['description']:
+            raise serializers.ValidationError("Title and description cannot be the same.")
+        return attrs
+    
     def validate_title(self, value):
         if len(value) < 2:
             raise serializers.ValidationError("Name must be at least 2 characters long.")
