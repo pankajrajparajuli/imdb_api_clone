@@ -22,3 +22,30 @@ class MovieSerializer(serializers.Serializer):
         instance.rating = validated_data.get('rating', instance.rating)
         instance.save()
         return instance
+    
+    def validate_title(self, value):
+        if len(value) < 2:
+            raise serializers.ValidationError("Name must be at least 2 characters long.")
+        if len(value) > 100:
+            raise serializers.ValidationError("Name must be at most 100 characters long.")
+        return value
+    
+    def validate_description(self, value):
+        if len(value) < 10:
+            raise serializers.ValidationError("Description must be at least 10 characters long.")
+        return value
+    
+    def validate_rating(self, value):
+        if value < 0 or value > 10:
+            raise serializers.ValidationError("Rating must be between 0 and 10.")
+        return value
+    
+    def validate_release_date(self, value):
+        if value > serializers.DateField().today():
+            raise serializers.ValidationError("Release date cannot be in the future.")
+        return value
+    
+    def validate_active(self, value):
+        if not isinstance(value, bool):
+            raise serializers.ValidationError("Active must be a boolean value.")
+        return value
