@@ -2,12 +2,13 @@ from rest_framework import serializers
 from watchlist_app.models import WatchList, StreamingPlatform, Review
 
 class ReviewSerializer(serializers.ModelSerializer):
+    review_user = serializers.StringRelatedField(read_only=True)
     """
     Serializer for the Review model.
     """
     class Meta:
         model = Review
-        fields = '__all__'
+        exclude = ('watchlist',)
         read_only_fields = ('id', 'created_at')
     
     def validate(self, attrs):
@@ -30,7 +31,7 @@ class WatchListSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = WatchList
-        fields = '__all__'
+        fields = ('__all__')
         read_only_fields = ('id', 'created_at')
     
     def get_len_title(self, obj):
@@ -90,8 +91,8 @@ class StreamingPlatformSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = StreamingPlatform
-        fields = '__all__'
-        read_only_fields = ('id',)
+        fields = ('__all__')
+        read_only_fields = ('id', 'created_at')
     
     def validate_name(self, value):
         if len(value) < 2:

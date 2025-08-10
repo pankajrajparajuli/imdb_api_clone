@@ -1,5 +1,6 @@
 from watchlist_app.models import WatchList, StreamingPlatform, Review
 #from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from watchlist_app.api.serializers import WatchListSerializer, StreamingPlatformSerializer, ReviewSerializer
@@ -54,10 +55,48 @@ class WatchListDetailView(APIView):
             return Response({'error': 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
 
-class ReviewListView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-    """ List all reviews or create a new review.
+class ReviewCreateView(generics.CreateAPIView):
     """
+    Create a new review for a movie one user one review.
+    """
+    serializer_class = ReviewSerializer
+    
+    def get_queryset(self):
+        watchlist_id = self.kwargs.get('pk')
+        return Review.objects.filter(watchlist=watchlist_id)
+    
+    def perform_create(self, serializer):
+        watchlist_id = self.kwargs.get('pk')
+        watchlist = WatchList.objects.get(pk = watchlist_id)
+        review_user = self.request.user
+        review_queryset = Review.objects.filter(review_user=review_user, watchlist=watchlist)
+        if review_queryset.exists():
+            raise ValidationError("You have already reviewed this movie.")
+        
+        serializer.save(watchlist=watchlist, review_user=review_user)
+
+class ReviewListView(generics.ListAPIView):
+    """
+    List all reviews.
+    """
+    serializer_class = ReviewSerializer
+    
+    def get_queryset(self):
+        review_id = self.kwargs.get('pk')
+        return Review.objects.filter(watchlist = review_id)
+        
+    
+class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update or delete a review instance.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+
+""" class ReviewListView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     
@@ -69,8 +108,6 @@ class ReviewListView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Ge
     
 
 class ReviewDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
-    """ Retrieve, update or delete a review instance.
-    """
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     
@@ -81,7 +118,7 @@ class ReviewDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixin
         return self.update(request, *args, **kwargs)
     
     def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+        return self.destroy(request, *args, **kwargs) """
 
 class StreamingPlatformView(APIView):
     """
