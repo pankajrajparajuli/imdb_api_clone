@@ -1,27 +1,43 @@
 from rest_framework import serializers
-from watchlist_app.models import Movie
+from watchlist_app.models import WatchList, StreamingPlatform
 
-class MovieSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    title = serializers.CharField()
-    description = serializers.CharField()
-    active = serializers.BooleanField()
-    release_date = serializers.DateField()
-    rating = serializers.DecimalField(max_digits=3, decimal_places=1)
-    created_at = serializers.DateTimeField()
+class StreamingPlatformSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the StreamingPlatform model.
+    """
+    class Meta:
+        model = StreamingPlatform
+        fields = '__all__'
+        read_only_fields = ('id',)
     
-    def create(self, validated_data):
-        Movie.objects.create(**validated_data)
-        return validated_data
+    def validate_name(self, value):
+        if len(value) < 2:
+            raise serializers.ValidationError("Name must be at least 2 characters long.")
+        if len(value) > 100:
+            raise serializers.ValidationError("Name must be at most 100 characters long.")
+        return value
     
-    def update(self, instance, validated_data):
-        instance.title = validated_data.get('title', instance.title)
-        instance.description = validated_data.get('description', instance.description)
-        instance.active = validated_data.get('active', instance.active)
-        instance.release_date = validated_data.get('release_date', instance.release_date)
-        instance.rating = validated_data.get('rating', instance.rating)
-        instance.save()
-        return instance
+    def validate_website(self, value):
+        if value and not value.startswith('http'):
+            raise serializers.ValidationError("Website must start with 'http' or 'https'.")
+        return value
+
+class WatchListSerializer(serializers.ModelSerializer):
+    len_title = serializers.SerializerMethodField()
+    
+    """
+    Serializer for the Movie model.
+    """
+    class Meta:
+        model = WatchList
+        fields = '__all__'
+        read_only_fields = ('id', 'created_at')
+    
+    def get_len_title(self, obj):
+        """
+        Returns the length of the movie title.
+        """
+        return len(obj.title) if obj.title else 0
     
     def validate(self, attrs):
         if not attrs.get('title'):
@@ -65,3 +81,27 @@ class MovieSerializer(serializers.Serializer):
         if not isinstance(value, bool):
             raise serializers.ValidationError("Active must be a boolean value.")
         return value
+
+""" class MovieSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    title = serializers.CharField()
+    description = serializers.CharField()
+    active = serializers.BooleanField()
+    release_date = serializers.DateField()
+    rating = serializers.DecimalField(max_digits=3, decimal_places=1)
+    created_at = serializers.DateTimeField()
+    
+    def create(self, validated_data):
+        Movie.objects.create(**validated_data)
+        return validated_data
+    
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.active = validated_data.get('active', instance.active)
+        instance.release_date = validated_data.get('release_date', instance.release_date)
+        instance.rating = validated_data.get('rating', instance.rating)
+        instance.save()
+        return instance """
+    
+    
