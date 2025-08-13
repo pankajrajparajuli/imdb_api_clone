@@ -20,6 +20,8 @@ class WatchList(models.Model):
     platform = models.ForeignKey(StreamingPlatform, related_name='watchlist', on_delete=models.CASCADE, null=True, blank=True)
     release_date = models.DateField()
     active = models.BooleanField(default=True)
+    number_of_reviews = models.PositiveIntegerField(default=0)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0, validators=[MinValueValidator(0), MaxValueValidator(10)])
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
