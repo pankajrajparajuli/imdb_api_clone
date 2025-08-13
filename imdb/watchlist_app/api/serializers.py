@@ -105,7 +105,7 @@ class StreamingPlatformSerializer(serializers.ModelSerializer):
         if value and not value.startswith('http'):
             raise serializers.ValidationError("Website must start with 'http' or 'https'.")
         return value
-
+    
 """ class MovieSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField()
