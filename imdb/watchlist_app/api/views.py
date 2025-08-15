@@ -21,7 +21,9 @@ from rest_framework import status, generics, mixins
 
 # Custom permission to allow only review owners to modify, others read-only
 from watchlist_app.api.permissions import ReviewUserorReadOnly
-
+# Authentication permission to restrict review creation to logged-in users
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 class WatchListView(APIView):
     """ 
@@ -37,6 +39,12 @@ class WatchListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        self.check_permissions(request)  # will run permissions for POST
+        if not request.user.is_staff:
+            return Response(
+                {"detail": "Only admins can add movies."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         # Deserialize incoming JSON to a WatchList instance (not yet saved)
         serializer = WatchListSerializer(data=request.data)
         if serializer.is_valid():
@@ -72,6 +80,7 @@ class WatchListDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
+        
         # Update an existing movie (full update)
         movie = self.get_object(pk)
         if movie is None:
@@ -103,6 +112,8 @@ class ReviewCreateView(generics.CreateAPIView):
     """
     # This view only needs the serializer class; queryset is derived per-movie
     serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated] # Custom permission to restrict access
+    authentication_classes = [TokenAuthentication]  # Use default authentication (e.g., Token, Session)
     
     def get_queryset(self):
         # Limit queryset to reviews for the given WatchList (movie) id from URL
