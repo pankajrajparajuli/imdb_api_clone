@@ -24,12 +24,15 @@ from watchlist_app.api.permissions import ReviewUserorReadOnly, IsAdminOrReadOnl
 # Authentication permission to restrict review creation to logged-in users
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.throttling import UserRateThrottle
+from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
 
 class WatchListView(APIView):
     """ 
     List all movies or create a new movie.
     """
     permission_classes = [IsAdminOrReadOnly]# Restrict access to authenticated users
+    throttle_classes = [UserRateThrottle]  # Limit requests to prevent abuse
     authentication_classes = [TokenAuthentication]  # Use default authentication (e.g., Token, Session)
     def get(self, request):
         # Fetch all WatchList records
@@ -107,6 +110,7 @@ class ReviewCreateView(generics.CreateAPIView):
     """
     # This view only needs the serializer class; queryset is derived per-movie
     serializer_class = ReviewSerializer
+    throttle_classes = [ReviewCreateThrottle]  # Custom throttle to limit review creation
     permission_classes = [IsAuthenticated] # Custom permission to restrict access
     authentication_classes = [TokenAuthentication]  # Use default authentication (e.g., Token, Session)
     
@@ -154,6 +158,7 @@ class ReviewListView(generics.ListAPIView):
     """
     # Use the same serializer for listing reviews
     serializer_class = ReviewSerializer
+    throttle_classes = [ReviewListThrottle]  # Custom throttle to limit review listing
     
     def get_queryset(self):
         # Return all reviews for a given watchlist (movie) id from URL
