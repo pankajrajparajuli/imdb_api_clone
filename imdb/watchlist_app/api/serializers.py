@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from watchlist_app.models import WatchList, StreamingPlatform, Review
+from datetime import date
 
 class ReviewSerializer(serializers.ModelSerializer):
     review_user = serializers.StringRelatedField(read_only=True)
@@ -74,7 +75,7 @@ class WatchListSerializer(serializers.ModelSerializer):
         return value
     
     def validate_release_date(self, value):
-        if value > serializers.DateField().today():
+        if value > date.today():
             raise serializers.ValidationError("Release date cannot be in the future.")
         return value
     

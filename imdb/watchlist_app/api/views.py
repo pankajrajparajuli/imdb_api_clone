@@ -20,7 +20,7 @@ from watchlist_app.api.serializers import (
 from rest_framework import status, generics, mixins
 
 # Custom permission to allow only review owners to modify, others read-only
-from watchlist_app.api.permissions import ReviewUserorReadOnly
+from watchlist_app.api.permissions import ReviewUserorReadOnly, IsAdminOrReadOnly
 # Authentication permission to restrict review creation to logged-in users
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
@@ -29,7 +29,8 @@ class WatchListView(APIView):
     """ 
     List all movies or create a new movie.
     """
-
+    permission_classes = [IsAdminOrReadOnly]# Restrict access to authenticated users
+    authentication_classes = [TokenAuthentication]  # Use default authentication (e.g., Token, Session)
     def get(self, request):
         # Fetch all WatchList records
         movies = WatchList.objects.all()
@@ -39,12 +40,6 @@ class WatchListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        self.check_permissions(request)  # will run permissions for POST
-        if not request.user.is_staff:
-            return Response(
-                {"detail": "Only admins can add movies."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         # Deserialize incoming JSON to a WatchList instance (not yet saved)
         serializer = WatchListSerializer(data=request.data)
         if serializer.is_valid():
