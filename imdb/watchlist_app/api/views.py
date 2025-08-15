@@ -210,7 +210,7 @@ class StreamingPlatformView(APIView):
     """
     List all streaming platforms or create a new one.
     """
-
+    permission_classes = [IsAdminOrReadOnly]
     def get(self, request):
         # Fetch all StreamingPlatform records
         platforms = StreamingPlatform.objects.all()
@@ -235,7 +235,7 @@ class StreamingPlatformDetailView(APIView):
     """
     Retrieve, update or delete a streaming platform instance.
     """
-
+    permission_classes = [IsAdminOrReadOnly]
     def get_object(self, pk):
         # Helper to get a platform by id or None
         try:
