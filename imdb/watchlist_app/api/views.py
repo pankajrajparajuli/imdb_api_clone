@@ -175,7 +175,7 @@ class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
     # Only review owners can modify; others have read-only access
     permission_classes = [ReviewUserorReadOnly]
-
+    authentication_classes = [TokenAuthentication]
 
 """
 # Alternative implementation using mixins (commented out but kept for reference)
