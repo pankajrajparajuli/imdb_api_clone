@@ -24,6 +24,7 @@ from watchlist_app.api.permissions import ReviewUserorReadOnly, IsAdminOrReadOnl
 # Authentication permission to restrict review creation to logged-in users
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class WatchListView(APIView):
     """ 
