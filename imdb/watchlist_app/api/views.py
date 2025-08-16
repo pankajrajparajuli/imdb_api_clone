@@ -17,7 +17,7 @@ from watchlist_app.api.serializers import (
 )
 
 # DRF status codes, generic views, and mixins
-from rest_framework import status, generics, mixins
+from rest_framework import status, generics, mixins,filters
 
 # Custom permission to allow only review owners to modify, others read-only
 from watchlist_app.api.permissions import ReviewUserorReadOnly, IsAdminOrReadOnly
@@ -27,6 +27,22 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
 from django_filters.rest_framework import DjangoFilterBackend
+
+
+
+
+class SearchWatchListView(generics.ListAPIView):
+    """
+    List all movies with optional search by title.
+    """
+    queryset = WatchList.objects.all()  # Fetch all movies
+    serializer_class = WatchListSerializer
+    throttle_classes = [AnonRateThrottle]  # Limit requests to prevent abuse
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]  # Enable filtering on this view
+    search_fields = ['title','=platform__name']  # Allow searching by movie title
+    ordering_fields = ['average_rating']  # Allow ordering by title or release date
+
+
 
 
 # This class is a Django API view that lists user reviews filtered by the username provided in the
