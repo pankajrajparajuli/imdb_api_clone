@@ -11,10 +11,10 @@ from rest_framework.response import Response
 
 # Serializers to convert model instances to/from JSON
 from watchlist_app.api.serializers import (
-    WatchListSerializer,
-    StreamingPlatformSerializer,
-    ReviewSerializer,
-)
+                                            WatchListSerializer,
+                                            StreamingPlatformSerializer,
+                                            ReviewSerializer,
+                                        )
 
 # DRF status codes, generic views, and mixins
 from rest_framework import status, generics, mixins,filters
