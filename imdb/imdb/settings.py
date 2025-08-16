@@ -149,6 +149,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '5/day',
         'user': '10/day',
+        'streaming_platforms': '5/minute',
         }
 }
 

@@ -24,7 +24,7 @@ from watchlist_app.api.permissions import ReviewUserorReadOnly, IsAdminOrReadOnl
 # Authentication permission to restrict review creation to logged-in users
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.throttling import UserRateThrottle
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
 
 class WatchListView(APIView):
@@ -58,7 +58,7 @@ class WatchListDetailView(APIView):
     """ 
     Retrieve, update or delete a movie instance.
     """
-
+    throttle_classes = [AnonRateThrottle]  # Limit requests to prevent abuse
     def get_object(self, pk):
         # Helper to safely fetch a movie by primary key
         try:
@@ -110,7 +110,7 @@ class ReviewCreateView(generics.CreateAPIView):
     """
     # This view only needs the serializer class; queryset is derived per-movie
     serializer_class = ReviewSerializer
-    throttle_classes = [ReviewCreateThrottle]  # Custom throttle to limit review creation
+    throttle_classes = [ReviewCreateThrottle, UserRateThrottle]  # Custom throttle to limit review creation
     permission_classes = [IsAuthenticated] # Custom permission to restrict access
     authentication_classes = [TokenAuthentication]  # Use default authentication (e.g., Token, Session)
     
@@ -241,6 +241,11 @@ class StreamingPlatformDetailView(APIView):
     Retrieve, update or delete a streaming platform instance.
     """
     permission_classes = [IsAdminOrReadOnly]
+    throttle_classes = [ScopedRateThrottle]  # Limit requests to prevent abuse
+    throttle_scope = 'streaming_platforms'  # Custom scope for throttling
+    
+    
+    
     def get_object(self, pk):
         # Helper to get a platform by id or None
         try:
