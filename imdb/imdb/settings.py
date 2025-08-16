@@ -43,7 +43,10 @@ INSTALLED_APPS = [
 EXTERNAL_APPS = [
     'watchlist_app',  # Custom app for managing watchfiles
     'rest_framework',  # Django REST framework for building APIs
+
     'rest_framework.authtoken',  # Token authentication for REST framework
+    'django_filters',  # Django filters for REST framework
+    'account_app',  # Custom app for user account management
     ]
 
 INSTALLED_APPS += EXTERNAL_APPS

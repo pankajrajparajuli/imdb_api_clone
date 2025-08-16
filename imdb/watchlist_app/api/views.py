@@ -5,7 +5,7 @@
 from watchlist_app.models import WatchList, StreamingPlatform, Review
 
 # DRF utilities for raising validation errors and building class-based views
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -26,7 +26,28 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 from watchlist_app.api.throttling import ReviewCreateThrottle, ReviewListThrottle
+from django_filters.rest_framework import DjangoFilterBackend
 
+
+# This class is a Django API view that lists user reviews filtered by the username provided in the
+# URL.
+class UserReviewDetailView(generics.ListAPIView):
+    """List reviews created by a specific user.
+    """
+    serializer_class = ReviewSerializer
+    throttle_classes = [UserRateThrottle]  # Custom throttle to limit review listing
+    #permission_classes = [IsAuthenticated]  # Only authenticated users can access
+    authentication_classes = [TokenAuthentication]  # Use token authentication
+
+    def get_queryset(self):
+        username = self.request.query_params.get('username')
+        if not username:
+            raise ValidationError("Username parameter is required.")
+        query_set = Review.objects.filter(review_user__username=username)
+        if not query_set.exists():
+            raise NotFound(f"No reviews found for user '{username}'.")
+        return query_set
+        
 class WatchListView(APIView):
     """ 
     List all movies or create a new movie.
@@ -159,6 +180,9 @@ class ReviewListView(generics.ListAPIView):
     # Use the same serializer for listing reviews
     serializer_class = ReviewSerializer
     throttle_classes = [ReviewListThrottle]  # Custom throttle to limit review listing
+    filter_backends = [DjangoFilterBackend]  # Enable filtering on this view
+    filterset_fields = ['review_user__username', 'watchlist__title']  # Allow filtering by username and movie title
+    
     
     def get_queryset(self):
         # Return all reviews for a given watchlist (movie) id from URL
