@@ -1,4 +1,3 @@
-from urllib import response
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -14,8 +13,9 @@ class UserRegistrationTests(APITestCase):
             'password': 'testpassword',
             'password2': 'testpassword'
             }
-        self.client.post(reverse('api-register'), data, format='json')
-        self.assertEqual(response.status_code , status.HTTP_201_CREATED)
+        response = self.client.post(reverse('api-register'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         
 
 
