@@ -16,7 +16,4 @@ class UserRegistrationTests(APITestCase):
         response = self.client.post(reverse('api-register'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        
-
-
 
